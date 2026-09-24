@@ -1,6 +1,7 @@
 <div align="center">
 
-# RFP Shred
+<img width="133" height="44" alt="image" src="https://github.com/user-attachments/assets/f31a16f8-35c1-41dd-a2bc-d7935bb582cd" />
+
 
 **Shred the RFP. Keep your weekend.**
 
