@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Choose a new password — RFP Shred{% endblock %}
+{% block content %}
+<h1>Choose a new password</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="/reset-password">
+  <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+  <input type="hidden" name="token" value="{{ token }}">
+  <label for="password">New password (at least 12 characters)</label>
+  <input id="password" name="password" type="password" required minlength="12" autocomplete="new-password">
+  <p><button type="submit">Update password</button></p>
+</form>
+{% endblock %}

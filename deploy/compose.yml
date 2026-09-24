@@ -1,0 +1,111 @@
+# Base stack: Postgres (the queue) + api + worker + sweep + caddy.
+# No Redis service exists in this stack (DIS-7).
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: rfp
+      POSTGRES_PASSWORD: rfp
+      POSTGRES_DB: rfp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rfp"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # not reachable outside the compose network (no published port)
+
+  # Schema authority is a one-shot prerequisite, not an API startup side
+  # effect. Every process that reads or writes application tables waits for a
+  # successful Alembic upgrade before it starts.
+  migrate:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql://rfp:rfp@postgres:5432/rfp
+    command: alembic upgrade head
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql://rfp:rfp@postgres:5432/rfp
+    command: uvicorn app.web:app --host 0.0.0.0 --port 8080 --workers 1
+    ports:
+      - "8080:8080"
+    volumes:
+      - files:/app/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql://rfp:rfp@postgres:5432/rfp
+    command: python -m app.worker.main
+    volumes:
+      - files:/app/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    deploy:
+      replicas: 1  # enforced: prevents multi-container file-lock bypass (FR-006)
+
+  sweep:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql://rfp:rfp@postgres:5432/rfp
+    command: python -m app.sweep.scheduler
+    volumes:
+      - files:/app/files
+      - ../tests/fixtures/corpus:/app/tests/fixtures/corpus:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  caddy:
+    image: caddy:2
+    environment:
+      # Dev receives a local hostname; the production overlay replaces this
+      # with a required operator-supplied public hostname.
+      PUBLIC_HOST: ${PUBLIC_HOST:-localhost}
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+
+volumes:
+  pgdata:
+  files:
+  caddy_data:

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Quality — Ops{% endblock %}
+{% block content %}
+<h1>Quality monitoring</h1>
+{% if not runs %}
+<p role="status">No quality run has completed yet.</p>
+{% else %}
+<table>
+  <thead><tr><th scope="col">Run at</th><th scope="col">Corpus subset</th><th scope="col">Omission</th><th scope="col">FP</th><th scope="col">Page-attr</th><th scope="col">Result</th></tr></thead>
+  <tbody>
+    {% for run in runs %}
+    <tr>
+      <td>{{ run.run_at }}</td>
+      <td>{{ run.corpus_subset | join(', ') }}</td>
+      <td>{{ '%.1f%%' | format(run.omission_rate * 100) }}</td>
+      <td>{{ '%.1f%%' | format(run.fp_rate * 100) }}</td>
+      <td>{{ '%.1f%%' | format(run.page_attr_error * 100) }}</td>
+      <td>{% if run.passed %}<span class="chip ready">pass</span>{% else %}<span class="chip failed">BREACH</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

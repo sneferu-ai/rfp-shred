@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}RFP Shred — compliance matrices in minutes{% endblock %}
+{% block content %}
+<section class="hero" aria-labelledby="pitch">
+  <div class="hero-copy">
+    <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Built for small government contractors</p>
+    <h1 id="pitch">Shred the RFP.<br><span>Keep your weekend.</span></h1>
+    <p class="hero-lede">Turn a federal solicitation into a review-ready compliance matrix in minutes. Every requirement keeps its clause, source page, and exact text—so your team can verify the work instead of recreating it.</p>
+    <div class="hero-actions">
+      <a class="cta cta-large" href="/signup">Shred your first RFP <span aria-hidden="true">→</span></a>
+      <a class="text-link" href="#workflow">See the workflow</a>
+    </div>
+    <ul class="trust-list" aria-label="Product guarantees">
+      <li><span aria-hidden="true">✓</span> Ten lines free</li>
+      <li><span aria-hidden="true">✓</span> PDF, DOCX &amp; ZIP</li>
+      <li><span aria-hidden="true">✓</span> Excel &amp; Word export</li>
+    </ul>
+  </div>
+  <div class="matrix-preview" aria-label="Example extracted compliance matrix">
+    <div class="preview-topbar">
+      <div>
+        <span class="preview-kicker">DRAFT MATRIX</span>
+        <strong>FA1234-26-R-0042</strong>
+      </div>
+      <span class="verified-badge">3 / 4 checked</span>
+    </div>
+    <div class="preview-progress"><span></span></div>
+    <div class="preview-head"><span>Clause</span><span>Requirement</span><span>Source</span><span></span></div>
+    <div class="preview-row is-checked">
+      <span><strong>L.2.1</strong><small>Volume I</small></span>
+      <span>Submit a technical approach not to exceed 25 pages.</span>
+      <span class="source-pill">p. 47</span><span class="check-mark">✓</span>
+    </div>
+    <div class="preview-row is-checked">
+      <span><strong>L.3.4</strong><small>Past performance</small></span>
+      <span>Provide three contracts completed within five years.</span>
+      <span class="source-pill">p. 53</span><span class="check-mark">✓</span>
+    </div>
+    <div class="preview-row is-active">
+      <span><strong>M.1.2</strong><small>Evaluation</small></span>
+      <span>Address staffing, transition, and quality control.</span>
+      <span class="source-pill">p. 81</span><span class="empty-check"></span>
+    </div>
+    <div class="preview-note"><span aria-hidden="true">↗</span><span><strong>Source-linked, not black-box.</strong><br>Open any citation and verify the original language.</span></div>
+  </div>
+</section>
+
+<section class="proof-strip" aria-label="Time and output summary">
+  <div><strong>6–12 hrs</strong><span>Typical manual shredding</span></div>
+  <span class="proof-arrow" aria-hidden="true">→</span>
+  <div><strong>Minutes</strong><span>To a cited first draft</span></div>
+  <span class="proof-divider" aria-hidden="true"></span>
+  <p>Spend proposal hours on strategy and response—not copying clauses into a spreadsheet.</p>
+</section>
+
+<section class="workflow-section" id="workflow" aria-labelledby="how">
+  <div class="section-heading">
+    <p class="eyebrow">A defensible first draft</p>
+    <h2 id="how">From solicitation to matrix in four clear steps.</h2>
+    <p>The machine does the tedious pass. Your team remains the authority.</p>
+  </div>
+  <ol class="workflow-grid">
+    <li><span class="step-number">01</span><span class="step-icon" aria-hidden="true">↑</span><h3>Upload</h3><p>Add a solicitation PDF, DOCX, or ZIP package.</p></li>
+    <li><span class="step-number">02</span><span class="step-icon" aria-hidden="true">⌁</span><h3>Extract</h3><p>Requirements are pulled into a structured draft.</p></li>
+    <li><span class="step-number">03</span><span class="step-icon" aria-hidden="true">✓</span><h3>Verify</h3><p>Check every row against its exact page and clause.</p></li>
+    <li><span class="step-number">04</span><span class="step-icon" aria-hidden="true">↓</span><h3>Export</h3><p>Download a clean Excel or Word compliance matrix.</p></li>
+  </ol>
+</section>
+
+<section class="trust-section" aria-labelledby="trust-heading">
+  <div>
+    <p class="eyebrow eyebrow-light">Trust is a feature</p>
+    <h2 id="trust-heading">No mystery rows. No silent omissions.</h2>
+    <p>Every extracted requirement carries the text that produced it. Filtered lines and citation-audit drops remain reviewable, and exports stay locked until every visible row is checked.</p>
+  </div>
+  <ul>
+    <li><span aria-hidden="true">01</span><div><strong>Page-cited evidence</strong><p>Jump from each matrix row back to its source page.</p></div></li>
+    <li><span aria-hidden="true">02</span><div><strong>Reviewable exclusions</strong><p>Inspect and restore anything filtered from the draft.</p></div></li>
+    <li><span aria-hidden="true">03</span><div><strong>Mandatory human check</strong><p>No final export until every requirement is verified.</p></div></li>
+  </ul>
+</section>
+
+<section class="pricing-callout" aria-labelledby="pricing-heading">
+  <div><p class="eyebrow">Start with the document in front of you</p><h2 id="pricing-heading">Ten requirements free. No card required.</h2><p>Open one full matrix for <strong>$149</strong>, or every matrix for <strong>$249/month</strong> during beta.</p></div>
+  <a class="cta cta-large" href="/signup">Build a free matrix <span aria-hidden="true">→</span></a>
+</section>
+{% endblock %}

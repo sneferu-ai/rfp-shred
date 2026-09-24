@@ -1,0 +1,46 @@
+{
+  "requirements": [
+    {
+      "clause_id": "L.1",
+      "section": "Section L",
+      "page": 2,
+      "text": "The offeror shall submit a technical volume not to exceed 50 pages.",
+      "is_binding": true
+    },
+    {
+      "clause_id": "L.2",
+      "section": "Section L",
+      "page": 3,
+      "text": "The offeror must provide resumes for all key personnel named in the proposal.",
+      "is_binding": true
+    },
+    {
+      "clause_id": "L.3",
+      "section": "Section L",
+      "page": 3,
+      "text": "The contractor shall deliver monthly status reports to the contracting officer.",
+      "is_binding": true
+    },
+    {
+      "clause_id": "M.1",
+      "section": "Section M",
+      "page": 4,
+      "text": "The Government will evaluate technical approach for soundness and feasibility.",
+      "is_binding": true
+    },
+        {
+            "clause_id": "M.2",
+            "section": "Section M",
+            "page": 4,
+            "text": "Past performance will be evaluated for recency and relevance.",
+            "is_binding": true
+        },
+        {
+            "clause_id": "AUTO.2",
+            "section": "Closing instructions",
+            "page": 5,
+            "text": "All proposals must remain valid for 90 days after the closing date.",
+            "is_binding": true
+        }
+  ]
+}

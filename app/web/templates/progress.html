@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Processing — RFP Shred{% endblock %}
+{% block content %}
+<h1>{{ rfp.solicitation_no or rfp.orig_name }}</h1>
+
+{% if degraded %}
+<div class="notice warn" role="status">Processing is temporarily paused — your document is queued and will be processed when service resumes.</div>
+{% endif %}
+
+<div id="progress-region" aria-live="polite" role="status">
+  <p class="progress-stage" id="stage-label">
+    {% if rfp.state == 'failed' %}Failed{% elif rfp.state == 'ready' %}Ready{% else %}Reading document…{% endif %}
+  </p>
+  <p id="page-counter">{% if rfp.page_count %}{{ rfp.page_count }} pages{% endif %}</p>
+</div>
+
+{% if rfp.state == 'failed' %}
+<div class="notice warn" role="alert">
+  <p><strong>Processing failed.</strong>
+  {% if run and run.error %}{{ run.error }}{% else %}The document could not be processed.{% endif %}</p>
+  <form method="post" action="/app/matrices/{{ rfp.id }}/reprocess" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+    <button type="submit" aria-label="Retry processing job {{ rfp.id }}">Retry</button>
+  </form>
+  {% if rfp.stored_path %}
+  <form method="post" action="/app/matrices/{{ rfp.id }}/reprocess" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+    <button type="submit" class="secondary">Re-process from source</button>
+  </form>
+  {% endif %}
+</div>
+{% elif rfp.state in ('ready','unlocked','cleared','exported') %}
+<p><a class="cta" href="/app/matrices/{{ rfp.id }}">Open the draft matrix</a></p>
+{% else %}
+<noscript><p>Refresh this page to see progress.</p></noscript>
+{% endif %}
+
+<script>
+(function () {
+  var rfpId = "{{ rfp.id }}";
+  var doneStates = ["ready", "unlocked", "cleared", "exported"];
+  var stageEl = document.getElementById("stage-label");
+  function stageText(s) {
+    return {reading: "Reading document…", extracting: "Extracting requirements…",
+            auditing: "Auditing citations…", ready: "Ready.", failed: "Failed",
+            queued: "Queued — processing is temporarily paused."}[s] || s;
+  }
+  function poll() {
+    if (doneStates.indexOf("{{ rfp.state }}") >= 0 || "{{ rfp.state }}" === "failed") { return; }
+    fetch("/api/jobs/" + rfpId).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) { return; }
+      if (stageEl) { stageEl.textContent = stageText(j.stage); }
+      if (j.stage === "ready" || j.state === "ready") { window.location.href = "/app/matrices/" + rfpId; }
+      else if (j.stage === "failed" || j.state === "failed") { window.location.reload(); }
+      else { setTimeout(poll, 2000); }
+    }).catch(function () { setTimeout(poll, 4000); });
+  }
+  // Always poll via vanilla JS — robust with or without htmx loaded.
+  // htmx is vendored (DIS-1) for the workbench's per-row interactions;
+  // the progress page uses a simple fetch loop so the stage label and
+  // redirect work identically in every environment.
+  setTimeout(poll, 2000);
+})();
+</script>
+{% endblock %}

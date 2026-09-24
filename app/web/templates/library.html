@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Library — RFP Shred{% endblock %}
+{% block content %}
+<h1>Your solicitations</h1>
+
+{% if over_cap %}
+<div class="notice warn" role="alert">Your monthly processing limit has been reached — uploads will resume on the 1st.</div>
+{% endif %}
+{% if degraded %}
+<div class="notice warn" role="alert">Processing is temporarily paused — your documents are queued and will process when service resumes.</div>
+{% endif %}
+{% if sweep_matches %}
+<div class="notice" aria-live="polite" id="watchlist-banner">
+  {{ sweep_matches|length }} new watchlist match{{ 'es' if sweep_matches|length != 1 else '' }} from last night's sweep:
+  {% for m in sweep_matches %}<a href="/app/matrices/{{ m.id }}">{{ m.solicitation_no or m.orig_name }}</a>{{ ", " if not loop.last }}{% endfor %}
+</div>
+{% endif %}
+
+{% if not rfps %}
+<div role="status" class="notice">
+  <p><strong>Shred your first RFP</strong> — upload a solicitation and get a page-cited draft
+  compliance matrix in minutes. Ten lines are free on every upload.</p>
+  <p><a class="cta" href="/app/new">Shred your first RFP</a></p>
+</div>
+{% else %}
+<p><a class="cta" href="/app/new">Shred another RFP</a></p>
+<table>
+  <caption class="visually-hidden">Your solicitations, newest first</caption>
+  <thead>
+    <tr><th scope="col">Solicitation</th><th scope="col">State</th><th scope="col">Uploaded</th><th scope="col">Actions</th></tr>
+  </thead>
+  <tbody>
+    {% for r in rfps %}
+    <tr>
+      <td>
+        <a href="{% if r.state in ('ready','unlocked','cleared','exported') %}/app/matrices/{{ r.id }}{% else %}/app/jobs/{{ r.id }}{% endif %}">
+          {{ r.solicitation_no or r.orig_name }}
+        </a>
+        {% if r.origin == 'sweep' %}<span class="chip sweep" aria-label="Watchlist match">Watchlist match</span>{% endif %}
+        {% if r.amends_rfp_id %}
+          {% set parent = parent_map.get(r.amends_rfp_id) %}
+          {% if parent %}<span class="chip" aria-label="Amendment">Amendment of <a href="/app/matrices/{{ parent.id }}">{{ parent.solicitation_no or parent.orig_name }}</a></span>{% endif %}
+        {% endif %}
+      </td>
+      <td><span class="chip {{ r.state }}" aria-label="state: {{ r.state }}">{{ r.state }}</span></td>
+      <td>{{ r.created_at.strftime('%Y-%m-%d') if r.created_at }}</td>
+      <td>
+        {% if r.stored_path %}
+        <form method="post" action="/app/matrices/{{ r.id }}/reprocess" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+          <button type="submit" class="secondary">Re-process</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

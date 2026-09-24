@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Shred an RFP — RFP Shred{% endblock %}
+{% block content %}
+<h1>Shred an RFP</h1>
+{% if over_cap %}
+<div class="notice warn" role="alert">Your monthly processing limit has been reached — uploads will resume on the 1st.</div>
+{% endif %}
+{% if degraded %}
+<div class="notice warn" role="alert">Processing is temporarily paused — your document will be queued and processed when service resumes.</div>
+{% endif %}
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="/app/new" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+  <label for="file">Solicitation file (PDF, DOCX, or ZIP of PDF/DOCX files)</label>
+  <div class="dropzone">
+    <input id="file" name="file" type="file" accept=".pdf,.docx,.zip" required aria-describedby="file-help">
+    <p id="file-help">Drag a file here or choose one. Max 60 MB. ZIPs must contain only PDF or DOCX files (max 500 entries).</p>
+  </div>
+  <label for="amends_rfp_id">Is this an amendment to a previous solicitation? (optional)</label>
+  <select id="amends_rfp_id" name="amends_rfp_id" aria-describedby="amends-help">
+    <option value="">— Not an amendment —</option>
+    {% for p in priors %}
+    <option value="{{ p.id }}">{{ p.solicitation_no or p.orig_name }} ({{ p.created_at.strftime('%Y-%m-%d') if p.created_at }})</option>
+    {% endfor %}
+  </select>
+  <span id="amends-help">Links this upload to the parent matrix with an Amendment badge.</span>
+  <p>
+    <label class="inline" for="keep_source" style="font-weight:400">
+      <input id="keep_source" name="keep_source" type="checkbox" style="width:auto">
+      Keep the source file after processing (default: destroyed 24 hours after processing)
+    </label>
+  </p>
+  <p><button type="submit">Upload and shred</button></p>
+</form>
+{% endblock %}

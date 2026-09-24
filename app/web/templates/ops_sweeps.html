@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Sweeps — Ops{% endblock %}
+{% block content %}
+<h1>Sweep history</h1>
+{% if not runs %}
+<p role="status">No sweep has run yet.</p>
+{% else %}
+<table>
+  <thead><tr><th scope="col">Started</th><th scope="col">Finished</th><th scope="col">Found</th><th scope="col">Matched</th><th scope="col">Errors</th></tr></thead>
+  <tbody>
+    {% for run in runs %}
+    <tr>
+      <td>{{ run.started_at }}</td>
+      <td>{{ run.finished_at or '—' }}</td>
+      <td>{{ run.found }}</td>
+      <td>{{ run.matched }}</td>
+      <td><details><summary>{{ run.errors | length }} entr{{ 'ies' if run.errors | length != 1 else 'y' }}</summary>
+        <pre>{{ run.errors | tojson(indent=2) }}</pre></details></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

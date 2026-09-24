@@ -1,0 +1,16 @@
+# The Docker build is an explicit source allowlist. This keeps local secrets,
+# databases, generated artifacts, caches, and operator files out of both the
+# build context and every intermediate image.
+**
+
+!app/
+!app/**
+!alembic/
+!alembic/**
+!scripts/
+!scripts/**
+!deploy/
+!deploy/Dockerfile
+!alembic.ini
+!pyproject.toml
+!uv.lock

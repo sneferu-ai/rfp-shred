@@ -1,0 +1,27 @@
+# Test overlay:
+#   docker compose -f deploy/compose.yml -f deploy/compose.test.yml run --rm api pytest -q --cov=app --cov-report=term --cov-fail-under=80
+#
+# The production venv is built with --no-dev (no pytest). The test entrypoint
+# installs pytest + pytest-cov into the venv before exec'ing the user args.
+# The repo is mounted at /app (venv at /opt/venv survives the mount) so the
+# host source + tests/fixtures are visible without rebuilding.
+services:
+  api:
+    entrypoint:
+      - sh
+      - -c
+      - |
+        pip install --no-cache-dir pytest pytest-cov >/dev/null 2>&1
+        exec python -m "$$@"
+      - --
+    command: []
+    environment:
+      DATABASE_URL: postgresql://rfp:rfp@postgres:5432/rfp
+      APP_ENV: test
+    volumes:
+      - ..:/app
+      - files:/app/files
+  worker:
+    profiles: ["disabled"]
+  sweep:
+    profiles: ["disabled"]

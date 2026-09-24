@@ -1,0 +1,16 @@
+{
+  "schema": "rfp-shred-cleanup-lineage-v1",
+  "product": "RFP-Shred-to-Inbox",
+  "idea_id": "idea-c0f7b95162e9",
+  "source_pipeline_id": "2026-07-25T01-59-16Z-pipeline-a5eb676f",
+  "source_worktree": "runs/2026-07-25T01-59-16Z-pipeline-a5eb676f/cooperative_code/wt",
+  "picked_idea_sha256": "dfbe5301e0dec72b86a9fc7c1f6241c6095037996aa7a1c42c5f58971063e88f",
+  "concept_lock_sha256": "10a430efd8319878e77dd7df95ff64060554c4277a15e9a8e79b7d2c7f3a9ad3",
+  "approved_spec_sha256": "74665bd0114db12c9106f93c9ca9683c36dd3a8b4f337401f7d84b6cb5515c90",
+  "selection": {
+    "kind": "manual_post_run_cleanup_copy",
+    "reason": "The only BUSINESS lineage contained an accepted three-round code implementation but no UI, docs, runtime, demo, or finalizer child. The historical delivery was incomplete, so the accepted parent code worktree was isolated and independently repaired here.",
+    "historical_artifacts_mutated": false
+  },
+  "canonical_demo_path": "/Users/orchistrator/Projects/RFP-Shred-to-Inbox"
+}

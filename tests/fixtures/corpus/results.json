@@ -1,0 +1,30 @@
+{
+  "omission_rate": 0.0,
+  "fp_rate": 0.0,
+  "page_attr_error": 0.0,
+  "per_format": {
+    "digital": {
+      "gt": 6,
+      "extracted": 6,
+      "matched": 6,
+      "matched_gt": 6,
+      "page_errors": 0,
+      "gt_binding_total": 6,
+      "omission_rate": 0.0,
+      "fp_rate": 0.0,
+      "page_attr_error": 0.0
+    }
+  },
+  "documents": {
+    "smoke_fixture": {
+      "format": "digital",
+      "ground_truth_binding": 6,
+      "extracted": 6,
+      "matched": 6,
+      "omission_rate": 0.0,
+      "fp_rate": 0.0,
+      "page_attr_error": 0.0
+    }
+  },
+  "note": "omission_rate is a LOWER-BOUND estimate: founder annotations may miss requirements the model also missed. Completeness validation requires a second-pass expert review of a subset (>=3 RFPs)."
+}

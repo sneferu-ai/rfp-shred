@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10261f">
+  <meta name="description" content="Turn government solicitations into source-cited compliance matrices.">
+  <title>{% block title %}RFP Shred{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css?v=20260813">
+  {% if ctx and ctx.session_row %}<meta name="csrf-token" content="{{ ctx.session_row.csrf_token }}">{% endif %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav aria-label="Main">
+      <a class="brand" href="/" aria-label="RFP Shred home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>RFP Shred</span>
+      </a>
+      <ul>
+        {% if ctx and ctx.account %}
+        <li><a href="/app">Library</a></li>
+        <li><a href="/app/new">Shred an RFP</a></li>
+        <li><a href="/app/account">Account</a></li>
+        {% if ctx.account.is_staff %}<li><a href="/ops/sweeps">Ops</a></li>{% endif %}
+        <li>
+          <form method="post" action="/logout" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+            <button type="submit" class="linklike">Log out</button>
+          </form>
+        </li>
+        {% else %}
+        <li><a href="/login">Log in</a></li>
+        <li><a href="/signup" class="cta">Start free</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div>
+      <a class="brand footer-brand" href="/" aria-label="RFP Shred home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>RFP Shred</span>
+      </a>
+      <p>Compliance matrices with page-cited requirements.</p>
+    </div>
+    <p class="footer-trust"><strong>Human-in-the-loop by design.</strong><br>Extraction is a draft; every line is verified before export.</p>
+  </footer>
+</body>
+</html>

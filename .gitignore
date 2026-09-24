@@ -1,0 +1,63 @@
+# claudopus per-worktree gitignore (FIX-275d 2026-05-04, FIX-378 2026-05-08)
+# Bridges may write scratch state under .tmp/ and
+# .cache/. The API keys / OAuth tokens that land
+# there must NEVER appear in the diff captured by
+# orchestrator/bridge/agent_base.py::compute_diff().
+.tmp/
+.cache/
+xdg_cache/
+xdg_config/
+kimi-config.toml
+*.api-key.toml
+*.api-key.json
+
+# FIX-378 (2026-05-08) — dependency-tree exclusion.
+# Smoking gun: run 2026-05-08T14-26-46Z-ui-989521e2.
+# Cheetah ran `npm install` + `npm run build` in the
+# worktree. compute_diff's `git add -N .` intent-added
+# 31,809 node_modules files, then `git diff` captured
+# 4.7M lines into Python memory. The orchestrator OOM-
+# died at 12:37 silently — leaving the run 'running'
+# with a stale lock and no events for hours. Without
+# these patterns, ANY worktree where the agent runs
+# package-manager installs (npm/yarn/pnpm/cargo/pip/go/
+# bun) will hit the same bomb. The patterns mirror
+# what every framework's project template gitignores.
+node_modules/
+.pnp/
+.pnp.js
+.yarn/cache/
+.yarn/build-state.yml
+.yarn/install-state.gz
+build/
+dist/
+.next/
+.nuxt/
+.svelte-kit/
+.turbo/
+.vite/
+.cache-loader/
+out/
+target/
+.build/
+.swiftpm/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.demo/
+demo.sqlite3
+demo-files/
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+*.egg-info/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

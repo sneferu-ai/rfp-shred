@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Matrix — {{ rfp.solicitation_no or rfp.orig_name }}{% endblock %}
+{% block content %}
+<h1>{{ rfp.solicitation_no or rfp.orig_name }}</h1>
+
+{% if drops %}
+<div class="notice warn" role="status">{{ drops|length }} line{{ 's' if drops|length != 1 else '' }} could not be verified against source text and {{ 'were' if drops|length != 1 else 'was' }} excluded.</div>
+{% endif %}
+
+{% if total_rows == 0 %}
+<div class="notice" role="status">
+  <p><strong>No binding requirements detected</strong> — verify the document contains Section L or M.</p>
+</div>
+{% else %}
+
+<div class="notice {% if all_checked %}ok{% endif %}" id="counter" aria-live="polite">
+  {% if all_checked %}{{ checked }} / {{ total_rows }} checked — export unlocked.{% else %}Verified {{ checked }} / {{ total_rows }}{% endif %}
+</div>
+
+{% if not entitled and total_rows > 10 %}
+<div class="notice">
+  <p>{{ locked_count }} further requirement{{ 's' if locked_count != 1 else '' }} locked — open the full matrix.</p>
+  <form method="post" action="/app/matrices/{{ rfp.id }}/unlock" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+    <input type="hidden" name="kind" value="single">
+    <button type="submit">Open this matrix — $149</button>
+  </form>
+  <form method="post" action="/app/matrices/{{ rfp.id }}/unlock" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+    <input type="hidden" name="kind" value="plan">
+    <button type="submit" class="secondary">Unlimited monthly — $249</button>
+  </form>
+</div>
+{% endif %}
+
+<p id="export-actions">
+  <a class="cta" href="/app/matrices/{{ rfp.id }}/export.xlsx"
+     {% if not all_checked %}aria-disabled="true" tabindex="-1" style="pointer-events:none;opacity:.5"{% endif %}>Export .xlsx</a>
+  <a class="cta" href="/app/matrices/{{ rfp.id }}/export.docx"
+     {% if not all_checked %}aria-disabled="true" tabindex="-1" style="pointer-events:none;opacity:.5"{% endif %}>Export .docx</a>
+</p>
+
+<table id="matrix">
+  <caption class="visually-hidden">Compliance matrix rows</caption>
+  <thead>
+    <tr>
+      <th scope="col">Clause ID</th><th scope="col">Section</th><th scope="col">Page</th>
+      <th scope="col">Requirement Text</th><th scope="col">Response</th><th scope="col">Checked</th><th scope="col">Tags</th>
+      {% if is_staff %}<th scope="col">Ground truth</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    {% include "row_fragment.html" %}
+    {% endfor %}
+  </tbody>
+</table>
+
+<details id="filtered-panel">
+  <summary>Review {{ filtered|length }} filtered line{{ 's' if filtered|length != 1 else '' }}</summary>
+  {% for line in filtered %}
+  <div class="notice">
+    <p><strong>Page {{ line.page }}</strong> — {{ line.text_preview }}…</p>
+    <details><summary>Full text</summary><p>{{ line.full_text }}</p></details>
+    <p><em>{{ line.filter_reason }}</em></p>
+    <form method="post" action="/app/matrices/{{ rfp.id }}/filtered/{{ line.id }}/restore">
+      <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+      <button type="submit" class="secondary">Re-include</button>
+    </form>
+  </div>
+  {% endfor %}
+</details>
+
+<details id="audit-drops-panel">
+  <summary>Review {{ drops|length }} audit-dropped line{{ 's' if drops|length != 1 else '' }}</summary>
+  {% for drop in drops %}
+  <div class="notice">
+    <p><strong>Page {{ drop.page }}</strong> — excerpt: {{ drop.excerpt }}</p>
+    <details><summary>Full text</summary><p>{{ drop.text }}</p></details>
+    <p><em>{{ drop.audit_failure_reason }}</em></p>
+    <form method="post" action="/app/matrices/{{ rfp.id }}/audit_drops/{{ drop.id }}/restore">
+      <input type="hidden" name="csrf_token" value="{{ ctx.session_row.csrf_token }}">
+      <button type="submit" class="secondary">Re-include</button>
+    </form>
+  </div>
+  {% endfor %}
+</details>
+{% endif %}
+
+<div aria-live="polite" id="save-announcer" class="visually-hidden"></div>
+
+<script>
+(function () {
+  var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  var csrf = csrfMeta ? csrfMeta.content : "";
+  var announcer = document.getElementById("save-announcer");
+  function announce(msg) { if (announcer) { announcer.textContent = msg; } }
+  function patch(rowId, payload, control) {
+    if (control) { control.disabled = true; }
+    fetch("/api/rows/" + rowId, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json", "X-CSRF-Token": csrf, "Accept": "application/json"},
+      body: JSON.stringify(payload),
+    }).then(function (r) {
+      if (!r.ok) { throw new Error("save failed"); }
+      announce("Saved.");
+      if (payload.hasOwnProperty("verified")) { window.location.reload(); }
+    }).catch(function () {
+      if (control) { control.disabled = false; if (control.type === "checkbox") { control.checked = !control.checked; } }
+      announce("Save failed — please retry");
+    }).finally(function () {
+      if (control) { control.disabled = false; }
+    });
+  }
+  document.addEventListener("change", function (ev) {
+    var el = ev.target;
+    var rowId = el.getAttribute("data-row-id");
+    if (!rowId) { return; }
+    if (el.classList.contains("row-check")) { patch(rowId, {verified: el.checked}, el); }
+    if (el.classList.contains("row-response")) { patch(rowId, {response: el.value}, el); }
+  });
+  document.addEventListener("keydown", function (ev) {
+    var el = ev.target;
+    if (ev.key === "Enter" && el.classList.contains("row-tag-input")) {
+      ev.preventDefault();
+      var rowId = el.getAttribute("data-row-id");
+      var existing = JSON.parse(el.getAttribute("data-tags") || "[]");
+      var value = el.value.trim();
+      if (value) { existing.push(value); patch(rowId, {tags: existing}, el); }
+    }
+  });
+  document.addEventListener("click", function (ev) {
+    var el = ev.target;
+    if (el.classList && el.classList.contains("tag-pill")) {
+      var rowId = el.getAttribute("data-row-id");
+      var existing = JSON.parse(el.getAttribute("data-tags") || "[]");
+      var tag = el.getAttribute("data-tag");
+      patch(rowId, {tags: existing.filter(function (t) { return t !== tag; })}, el);
+    }
+  });
+  // Mid-session unlock: re-check entitlement when the tab regains focus.
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && {{ 'true' if not entitled else 'false' }}) {
+      fetch("/api/matrices/{{ rfp.id }}").then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (j && j.unlocked) { window.location.reload(); } });
+    }
+  });
+})();
+</script>
+{% endblock %}

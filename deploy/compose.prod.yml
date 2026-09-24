@@ -1,0 +1,46 @@
+# Production overlay: same images, prod env file, TLS via caddy.
+#   docker compose -f deploy/compose.yml -f deploy/compose.prod.yml --env-file .env up -d
+services:
+  migrate:
+    environment:
+      APP_ENV: prod
+  api:
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+    # The API is unreachable from the host in this overlay, so all inbound
+    # traffic crosses the private Compose network through Caddy. Trust proxy
+    # headers from that network so HTTPS scheme and client IP survive the hop.
+    command:
+      - uvicorn
+      - app.web:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --workers
+      - "1"
+      - --proxy-headers
+      - --forwarded-allow-ips=*
+    # Compose sequence merging would retain base port 8080 for a plain `[]`.
+    # !reset is required so traffic enters through Caddy/TLS only.
+    ports: !reset []
+  worker:
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+  sweep:
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+  postgres:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+  caddy:
+    restart: unless-stopped
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?PUBLIC_HOST must be set to the production hostname}

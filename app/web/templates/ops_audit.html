@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Audit log — Ops{% endblock %}
+{% block content %}
+<h1>Audit log</h1>
+<form method="get" action="/ops/audit">
+  <label for="action">Filter by action</label>
+  <select id="action" name="action">
+    <option value="">— all —</option>
+    {% for a in actions %}<option value="{{ a }}" {% if a == action %}selected{% endif %}>{{ a }}</option>{% endfor %}
+  </select>
+  <button type="submit">Filter</button>
+</form>
+{% if not events %}
+<p role="status">No audit events.</p>
+{% else %}
+<table>
+  <thead><tr><th scope="col">At</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Entity</th><th scope="col">Entity ID</th></tr></thead>
+  <tbody>
+    {% for e in events %}
+    <tr>
+      <td>{{ e.at }}</td><td>{{ e.actor_id or '—' }}</td><td>{{ e.action }}</td>
+      <td>{{ e.entity }}</td><td><code>{{ e.entity_id }}</code></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<nav aria-label="Pagination">
+  {% if page > 1 %}<a href="/ops/audit?page={{ page - 1 }}&action={{ action }}">← Previous</a>{% endif %}
+  <a href="/ops/audit?page={{ page + 1 }}&action={{ action }}">Next →</a>
+</nav>
+{% endif %}
+{% endblock %}

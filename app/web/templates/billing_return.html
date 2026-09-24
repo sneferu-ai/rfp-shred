@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Checkout — RFP Shred{% endblock %}
+{% block content %}
+<h1>Finishing checkout…</h1>
+<div class="notice" role="status" aria-live="polite">
+  <p>Confirming your payment. This usually takes a few seconds.</p>
+  <p><a href="/app/matrices/{{ matrix_id }}">Open the matrix</a></p>
+</div>
+<script>
+(function () {
+  var matrixId = "{{ matrix_id }}";
+  var tries = 0;
+  function poll() {
+    fetch("/api/matrices/" + matrixId).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && j.unlocked) { window.location.href = "/app/matrices/" + matrixId; return; }
+        tries += 1;
+        if (tries < 30) { setTimeout(poll, 2000); }
+      }).catch(function () { setTimeout(poll, 3000); });
+  }
+  if (matrixId) { poll(); }
+})();
+</script>
+{% endblock %}
