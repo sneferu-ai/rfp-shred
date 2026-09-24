@@ -18,6 +18,8 @@ Upload a federal solicitation (PDF, DOCX or ZIP). Get back a draft **compliance 
 
 ---
 
+**The specification:** [`docs/specification/`](docs/specification/) holds the specification Sneferu built this from, copied word for word from its run record.
+
 ## Why this exists
 
 Small government contractors answer RFPs by hand. Someone reads the whole solicitation, copies every "shall" and "must" into a spreadsheet, and tracks where each one came from. It's slow and error-prone, and if a single requirement slips through, the bid can be ruled non-compliant.
