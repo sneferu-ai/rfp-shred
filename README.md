@@ -163,9 +163,6 @@ Run `2026-07-25T01-59-16Z-pipeline-a5eb676f`. `LINEAGE.json` binds the idea, con
 <div align="center">
 
 ---
-
-**Built by [Sneferu](https://sneferu.ai)**
-
-<sub>README by Claude (Anthropic).</sub>
+<a href="https://sneferu.ai" class="brand" href="#top" aria-label="Sneferu home"><img src="https://github.com/user-attachments/assets/436aaac6-d48b-440d-bc58-38b14a209583" width="220px" alt="Sneferu"></a>
 
 </div>
